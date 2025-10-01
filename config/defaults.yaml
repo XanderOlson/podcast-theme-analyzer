@@ -1,0 +1,32 @@
+{
+  "runtime": {
+    "environment": "development"
+  },
+  "paths": {
+    "data_dir": "data",
+    "database": "data/transcripts.db",
+    "raw_audio_dir": "data/raw_audio",
+    "cache_dir": "cache"
+  },
+  "ingestion": {
+    "poll_interval_seconds": 300,
+    "max_concurrent_jobs": 4
+  },
+  "llm": {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "temperature": 0.2,
+    "max_tokens": 2048
+  },
+  "logging": {
+    "level": "INFO",
+    "json": true
+  },
+  "feeds": {
+    "default_tags": [
+      "technology",
+      "business"
+    ],
+    "sources": []
+  }
+}
