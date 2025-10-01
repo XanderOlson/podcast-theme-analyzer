@@ -155,6 +155,32 @@ def test_source_meta_insert_select(migrated_connection) -> None:
     )
 
 
+def test_source_meta_table_schema(migrated_connection) -> None:
+    assert _column_names(migrated_connection, "source_meta") == [
+        "resource_url",
+        "etag",
+        "last_modified",
+        "last_status",
+        "last_fetch_ts",
+        "content_sha256",
+        "bytes",
+    ]
+
+
+def test_source_meta_table_types_and_primary_key(migrated_connection) -> None:
+    info = _column_types(migrated_connection, "source_meta")
+
+    assert info == {
+        "resource_url": ("TEXT", True),
+        "etag": ("TEXT", False),
+        "last_modified": ("TEXT", False),
+        "last_status": ("INTEGER", False),
+        "last_fetch_ts": ("TIMESTAMP", False),
+        "content_sha256": ("TEXT", False),
+        "bytes": ("INTEGER", False),
+    }
+
+
 def test_provenance_insert_select(migrated_connection) -> None:
     migrated_connection.execute(
         """
