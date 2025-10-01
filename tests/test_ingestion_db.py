@@ -181,6 +181,30 @@ def test_source_meta_table_types_and_primary_key(migrated_connection) -> None:
     }
 
 
+def test_provenance_table_schema(migrated_connection) -> None:
+    assert _column_names(migrated_connection, "provenance") == [
+        "object_type",
+        "object_id",
+        "source_url",
+        "fetched_at",
+        "parser_version",
+        "notes",
+    ]
+
+
+def test_provenance_table_types_and_primary_key(migrated_connection) -> None:
+    info = _column_types(migrated_connection, "provenance")
+
+    assert info == {
+        "object_type": ("TEXT", True),
+        "object_id": ("TEXT", True),
+        "source_url": ("TEXT", True),
+        "fetched_at": ("TIMESTAMP", True),
+        "parser_version": ("TEXT", False),
+        "notes": ("TEXT", False),
+    }
+
+
 def test_provenance_insert_select(migrated_connection) -> None:
     migrated_connection.execute(
         """
