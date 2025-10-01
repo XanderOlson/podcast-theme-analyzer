@@ -42,6 +42,13 @@ def _column_names(connection, table: str) -> list[str]:
     return [row[1] for row in info]
 
 
+def _column_types(connection, table: str) -> dict[str, tuple[str, bool]]:
+    """Return column types and whether the column is part of the primary key."""
+
+    info = connection.execute(f"PRAGMA table_info('{table}')").fetchall()
+    return {row[1]: (row[2], bool(row[5])) for row in info}
+
+
 def test_shows_table_schema(migrated_connection) -> None:
     assert _column_names(migrated_connection, "shows") == [
         "show_id",
@@ -51,6 +58,19 @@ def test_shows_table_schema(migrated_connection) -> None:
         "lang",
         "last_crawl_at",
     ]
+
+
+def test_shows_table_types_and_primary_key(migrated_connection) -> None:
+    info = _column_types(migrated_connection, "shows")
+
+    assert info == {
+        "show_id": ("TEXT", True),
+        "title": ("TEXT", False),
+        "canonical_rss_url": ("TEXT", False),
+        "publisher": ("TEXT", False),
+        "lang": ("TEXT", False),
+        "last_crawl_at": ("TIMESTAMP", False),
+    }
 
 
 def test_episodes_table_schema(migrated_connection) -> None:
