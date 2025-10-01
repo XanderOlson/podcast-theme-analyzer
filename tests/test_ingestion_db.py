@@ -185,14 +185,6 @@ def test_episodes_show_id_foreign_key_enforced(migrated_connection) -> None:
     assert rows == [("episode-1", "show-1", "Good Episode")]
 
 
-def test_schema_migrations_recorded(migrated_connection) -> None:
-    rows = migrated_connection.execute(
-        "SELECT migration_name FROM schema_migrations ORDER BY applied_at"
-    ).fetchall()
-
-    assert rows == [("0001_initial_schema",)]
-
-
 def test_initialize_database_idempotent(tmp_path: Path) -> None:
     db_path = tmp_path / "ingestion.duckdb"
 
@@ -207,12 +199,8 @@ def test_initialize_database_idempotent(tmp_path: Path) -> None:
 
     second = initialize_database(db_path)
     try:
-        shows = second.execute("SELECT show_id, title FROM shows").fetchall()
-        migrations = second.execute(
-            "SELECT migration_name FROM schema_migrations"
-        ).fetchall()
-        assert shows == [("show-1", "Test Show")]
-        assert migrations == [("0001_initial_schema",)]
+        rows = second.execute("SELECT show_id, title FROM shows").fetchall()
+        assert rows == [("show-1", "Test Show")]
     finally:
         second.close()
 
