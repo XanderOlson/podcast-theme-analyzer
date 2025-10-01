@@ -11,7 +11,7 @@ if str(SRC_PATH) not in sys.path:
 
 import pytest
 
-pytest.importorskip("duckdb")
+duckdb = pytest.importorskip("duckdb")
 
 from ingestion.db import initialize_database, open_database
 
@@ -145,6 +145,44 @@ def test_provenance_insert_select(migrated_connection) -> None:
         "1.0.0",
         "initial import",
     )
+
+
+def test_shows_canonical_rss_url_unique(migrated_connection) -> None:
+    migrated_connection.execute(
+        "INSERT INTO shows (show_id, canonical_rss_url) VALUES (?, ?)",
+        ("show-1", "https://example.com/feed.xml"),
+    )
+
+    with pytest.raises(duckdb.ConstraintException):
+        migrated_connection.execute(
+            "INSERT INTO shows (show_id, canonical_rss_url) VALUES (?, ?)",
+            ("show-2", "https://example.com/feed.xml"),
+        )
+
+
+def test_episodes_show_id_foreign_key_enforced(migrated_connection) -> None:
+    migrated_connection.execute(
+        "INSERT INTO shows (show_id, title) VALUES (?, ?)",
+        ("show-1", "Test Show"),
+    )
+
+    with pytest.raises(duckdb.ConstraintException):
+        migrated_connection.execute(
+            "INSERT INTO episodes (episode_id, show_id, title) VALUES (?, ?, ?)",
+            ("episode-missing-show", "missing", "Bad Episode"),
+        )
+
+    migrated_connection.execute(
+        "INSERT INTO episodes (episode_id, show_id, title) VALUES (?, ?, ?)",
+        ("episode-1", "show-1", "Good Episode"),
+    )
+
+    rows = migrated_connection.execute(
+        "SELECT episode_id, show_id, title FROM episodes WHERE episode_id = ?",
+        ("episode-1",),
+    ).fetchall()
+
+    assert rows == [("episode-1", "show-1", "Good Episode")]
 
 
 def test_initialize_database_idempotent(tmp_path: Path) -> None:
