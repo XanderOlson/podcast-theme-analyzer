@@ -94,6 +94,29 @@ def test_episodes_table_schema(migrated_connection) -> None:
     ]
 
 
+def test_episodes_table_types_and_primary_key(migrated_connection) -> None:
+    info = _column_types(migrated_connection, "episodes")
+
+    assert info == {
+        "episode_id": ("TEXT", True),
+        "show_id": ("TEXT", False),
+        "guid": ("TEXT", False),
+        "title": ("TEXT", False),
+        "pubdate": ("TIMESTAMP", False),
+        "duration_s": ("INTEGER", False),
+        "audio_url": ("TEXT", False),
+        "transcript_url": ("TEXT", False),
+        "enclosure_type": ("TEXT", False),
+        "explicit": ("BOOLEAN", False),
+        "episode_type": ("TEXT", False),
+        "season_n": ("INTEGER", False),
+        "episode_n": ("INTEGER", False),
+        "first_seen_at": ("TIMESTAMP", False),
+        "last_seen_at": ("TIMESTAMP", False),
+        "tombstoned_bool": ("BOOLEAN", False),
+    }
+
+
 def test_source_meta_insert_select(migrated_connection) -> None:
     migrated_connection.execute(
         """
