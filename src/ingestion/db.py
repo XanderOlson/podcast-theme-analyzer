@@ -88,6 +88,13 @@ def initialize_database(db_path: Path = DEFAULT_DB_PATH) -> DuckDBPyConnection:
 def _run_schema_statements(
     connection: DuckDBPyConnection, statements: Iterable[str]
 ) -> None:
-    for statement in statements:
-        connection.execute(statement)
+    connection.execute("BEGIN TRANSACTION")
+    try:
+        for statement in statements:
+            connection.execute(statement)
+    except Exception:  # pragma: no cover - defensive rollback
+        connection.execute("ROLLBACK")
+        raise
+    else:
+        connection.execute("COMMIT")
 
